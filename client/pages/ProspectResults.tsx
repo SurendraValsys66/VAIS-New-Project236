@@ -1671,118 +1671,8 @@ export default function ProspectResults() {
                                     </AvatarFallback>
                                   </Avatar>
                                   <div className="flex-1">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="font-medium text-gray-900">
-                                        {prospect.fullName}
-                                      </div>
-                                      {hoveredRowId === prospect.id && (
-                                        <Sheet>
-                                          <SheetTrigger asChild>
-                                            <Button
-                                              variant="default"
-                                              size="sm"
-                                              className="bg-valasys-orange hover:bg-valasys-orange/90 text-white gap-1 h-6 text-xs py-0 px-2"
-                                              aria-label="Quick view prospect"
-                                              onClick={() =>
-                                                setSelectedProspect(prospect)
-                                              }
-                                            >
-                                              <Eye className="w-3 h-3" />
-                                              <span className="text-xs font-medium">
-                                                Quick View
-                                              </span>
-                                            </Button>
-                                          </SheetTrigger>
-                                          <SheetContent
-                                            side="right"
-                                            className="sm:max-w-md md:max-w-lg lg:max-w-xl w-[90vw] h-screen overflow-y-auto"
-                                          >
-                                            <SheetHeader>
-                                              <SheetTitle className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                  <Avatar className="h-12 w-12">
-                                                    <AvatarImage
-                                                      src={prospect.profileImageUrl}
-                                                      alt={prospect.fullName}
-                                                    />
-                                                    <AvatarFallback className="bg-valasys-orange text-white">
-                                                      {prospect.firstName[0]}
-                                                      {prospect.lastName[0]}
-                                                    </AvatarFallback>
-                                                  </Avatar>
-                                                  <div>
-                                                    <div className="text-xl font-bold">
-                                                      {prospect.fullName}
-                                                    </div>
-                                                    <div className="text-sm text-gray-600 font-normal">
-                                                      {prospect.jobTitle} at{" "}
-                                                      {prospect.companyName}
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                  <Badge
-                                                    variant="secondary"
-                                                    className={cn(
-                                                      "border",
-                                                      getIntentSignalColor(
-                                                        prospect.intentSignal,
-                                                      ),
-                                                    )}
-                                                  >
-                                                    {prospect.intentSignal}
-                                                  </Badge>
-                                                  <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                      <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        aria-label={
-                                                          isFavorite(prospect.id)
-                                                            ? "Remove favorite"
-                                                            : "Add favorite"
-                                                        }
-                                                        onClick={() =>
-                                                          toggleFavorite(
-                                                            prospect.id,
-                                                            prospect.fullName,
-                                                          )
-                                                        }
-                                                      >
-                                                        <Star
-                                                          className={cn(
-                                                            "w-4 h-4",
-                                                            isFavorite(prospect.id)
-                                                              ? "text-yellow-500"
-                                                              : "text-gray-500",
-                                                          )}
-                                                          fill={
-                                                            isFavorite(prospect.id)
-                                                              ? "currentColor"
-                                                              : "none"
-                                                          }
-                                                        />
-                                                      </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                      {isFavorite(prospect.id)
-                                                        ? "Unfavorite"
-                                                        : "Add to favorites"}
-                                                    </TooltipContent>
-                                                  </Tooltip>
-                                                </div>
-                                              </SheetTitle>
-                                              <SheetDescription>
-                                                Quick prospect overview
-                                              </SheetDescription>
-                                            </SheetHeader>
-
-                                            <div className="py-4 text-center text-gray-600">
-                                              <p>Click on the prospect details in the Contact Info column for full information</p>
-                                            </div>
-                                          </SheetContent>
-                                        </Sheet>
-                                      )}
+                                    <div className="font-medium text-gray-900">
+                                      {prospect.fullName}
                                     </div>
                                     <div className="text-sm text-gray-600">
                                       {prospect.jobTitle}
@@ -1802,6 +1692,114 @@ export default function ProspectResults() {
                                       </Badge>
                                     </div>
                                   </div>
+                                  {hoveredRowId === prospect.id && (
+                                    <Sheet>
+                                      <SheetTrigger asChild>
+                                        <Button
+                                          variant="default"
+                                          size="sm"
+                                          className="bg-valasys-orange hover:bg-valasys-orange/90 text-white gap-1 h-8 flex-shrink-0"
+                                          aria-label="Quick view prospect"
+                                          onClick={() =>
+                                            setSelectedProspect(prospect)
+                                          }
+                                        >
+                                          <Eye className="w-4 h-4" />
+                                          <span className="text-xs font-medium">
+                                            Quick View
+                                          </span>
+                                        </Button>
+                                      </SheetTrigger>
+                                      <SheetContent
+                                        side="right"
+                                        className="sm:max-w-md md:max-w-lg lg:max-w-xl w-[90vw] h-screen overflow-y-auto"
+                                      >
+                                        <SheetHeader>
+                                          <SheetTitle className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                              <Avatar className="h-12 w-12">
+                                                <AvatarImage
+                                                  src={prospect.profileImageUrl}
+                                                  alt={prospect.fullName}
+                                                />
+                                                <AvatarFallback className="bg-valasys-orange text-white">
+                                                  {prospect.firstName[0]}
+                                                  {prospect.lastName[0]}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                              <div>
+                                                <div className="text-xl font-bold">
+                                                  {prospect.fullName}
+                                                </div>
+                                                <div className="text-sm text-gray-600 font-normal">
+                                                  {prospect.jobTitle} at{" "}
+                                                  {prospect.companyName}
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <Badge
+                                                variant="secondary"
+                                                className={cn(
+                                                  "border",
+                                                  getIntentSignalColor(
+                                                    prospect.intentSignal,
+                                                  ),
+                                                )}
+                                              >
+                                                {prospect.intentSignal}
+                                              </Badge>
+                                              <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    aria-label={
+                                                      isFavorite(prospect.id)
+                                                        ? "Remove favorite"
+                                                        : "Add favorite"
+                                                    }
+                                                    onClick={() =>
+                                                      toggleFavorite(
+                                                        prospect.id,
+                                                        prospect.fullName,
+                                                      )
+                                                    }
+                                                  >
+                                                    <Star
+                                                      className={cn(
+                                                        "w-4 h-4",
+                                                        isFavorite(prospect.id)
+                                                          ? "text-yellow-500"
+                                                          : "text-gray-500",
+                                                      )}
+                                                      fill={
+                                                        isFavorite(prospect.id)
+                                                          ? "currentColor"
+                                                          : "none"
+                                                      }
+                                                    />
+                                                  </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  {isFavorite(prospect.id)
+                                                    ? "Unfavorite"
+                                                    : "Add to favorites"}
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            </div>
+                                          </SheetTitle>
+                                          <SheetDescription>
+                                            Quick prospect overview
+                                          </SheetDescription>
+                                        </SheetHeader>
+
+                                        <div className="py-4 text-center text-gray-600">
+                                          <p>Click on the prospect details in the Contact Info column for full information</p>
+                                        </div>
+                                      </SheetContent>
+                                    </Sheet>
+                                  )}
                                 </div>
                               </TableCell>
                             )}
