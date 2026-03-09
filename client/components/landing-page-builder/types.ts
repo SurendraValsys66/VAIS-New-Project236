@@ -1,3 +1,29 @@
+export interface LandingPageBlockProperties extends Record<string, any> {
+  // Common styling properties
+  backgroundColor?: string;
+  textColor?: string;
+  padding?: string;
+  margin?: string;
+  borderRadius?: string;
+  shadow?: string;
+  opacity?: string;
+  fontFamily?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  lineHeight?: string;
+  minHeight?: string;
+  maxHeight?: string;
+  // Spacing
+  paddingTop?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
+  paddingRight?: string;
+  marginTop?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+  marginRight?: string;
+}
+
 export interface LandingPageBlock {
   id: string;
   type:
@@ -12,9 +38,31 @@ export interface LandingPageBlock {
     | "pricing"
     | "faq"
     | "signup"
-    | "pricing-footer";
-  properties: Record<string, any>;
+    | "pricing-footer"
+    | "section"
+    | "row"
+    | "column";
+  properties: LandingPageBlockProperties;
   children?: LandingPageBlock[];
+}
+
+export interface GridLayout {
+  type: "grid";
+  columns: number; // 12-column grid
+  gap: number;
+  responsiveBreakpoints?: {
+    mobile: number;
+    tablet: number;
+  };
+}
+
+export interface ColumnLayout {
+  gridStart: number; // 1-12
+  gridEnd: number; // 1-12
+  responsive: {
+    mobile: number; // columns on mobile
+    tablet: number; // columns on tablet
+  };
 }
 
 export interface LandingPage {
@@ -25,3 +73,18 @@ export interface LandingPage {
   updatedAt: string;
   blocks: LandingPageBlock[];
 }
+
+// Drag and drop types
+export interface DragItem {
+  type: string;
+  id: string;
+  sourceId?: string;
+  targetId?: string;
+}
+
+export type BlockType =
+  | "component"
+  | "section"
+  | "row"
+  | "column"
+  | "spacer";

@@ -19,6 +19,9 @@ import {
   createContactFormBlock,
   createFooterBlock,
   createSectionSpacerBlock,
+  createSectionBlock,
+  createRowBlock,
+  createColumnBlock,
 } from "./utils";
 import { LandingPageBlock } from "./types";
 
@@ -57,7 +60,7 @@ export const BlocksPanel: React.FC<BlocksPanelProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["start", "basics", "cms", "elements"]),
+    new Set(["layout", "start", "basics", "cms", "elements"]),
   );
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -103,6 +106,37 @@ export const BlocksPanel: React.FC<BlocksPanelProps> = ({
   };
 
   const sectionGroups: SectionGroup[] = [
+    {
+      id: "layout",
+      label: "Layout",
+      items: [
+        {
+          id: "section",
+          label: "Section",
+          onCreate: createSectionBlock,
+          variants: [
+            {
+              id: "layout-section",
+              name: "Section",
+              description: "Full width section container",
+              onCreate: createSectionBlock,
+            },
+            {
+              id: "layout-row",
+              name: "Row",
+              description: "12-column grid row",
+              onCreate: createRowBlock,
+            },
+            {
+              id: "layout-column",
+              name: "Column",
+              description: "Resizable column (1-12 spans)",
+              onCreate: () => createColumnBlock(1, 7),
+            },
+          ],
+        },
+      ],
+    },
     {
       id: "start",
       label: "Start",

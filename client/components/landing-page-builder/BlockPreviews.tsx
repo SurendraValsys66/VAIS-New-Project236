@@ -1,5 +1,10 @@
 import React from "react";
 import { LandingPageBlock } from "./types";
+export {
+  SectionBlockPreview,
+  RowBlockPreview,
+  ColumnBlockPreview,
+} from "./LayoutBlockPreviews";
 
 interface BlockPreviewProps {
   block: LandingPageBlock;

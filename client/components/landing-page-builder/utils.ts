@@ -378,6 +378,51 @@ export const createPricingFooterTemplate = (): LandingPageBlock[] => [
   createPricingFooterBlock(),
 ];
 
+// Layout builder functions
+export const createSectionBlock = (): LandingPageBlock => ({
+  id: `section-${Date.now()}`,
+  type: "section",
+  properties: {
+    backgroundColor: "#ffffff",
+    padding: "40px",
+    minHeight: "200px",
+  },
+  children: [],
+});
+
+export const createRowBlock = (): LandingPageBlock => ({
+  id: `row-${Date.now()}`,
+  type: "row",
+  properties: {
+    display: "grid",
+    gridTemplateColumns: "repeat(12, 1fr)",
+    gap: "16px",
+    padding: "0",
+  },
+  children: [],
+});
+
+export const createColumnBlock = (
+  gridStart: number = 1,
+  gridEnd: number = 7,
+): LandingPageBlock => ({
+  id: `column-${Date.now()}`,
+  type: "column",
+  properties: {
+    gridColumnStart: gridStart,
+    gridColumnEnd: gridEnd,
+    minHeight: "100px",
+    backgroundColor: "transparent",
+    border: "1px dashed #e5e7eb",
+    padding: "0",
+    responsive: {
+      mobile: 12,
+      tablet: 6,
+    },
+  },
+  children: [],
+});
+
 // Local storage functions
 export const getLandingPagesFromLocalStorage = (): LandingPage[] => {
   try {
