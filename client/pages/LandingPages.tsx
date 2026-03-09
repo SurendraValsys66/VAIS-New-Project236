@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { LandingPageBuilder } from "@/components/landing-page-builder/LandingPageBuilder";
+import { LandingPageBuilderEnhanced } from "@/components/landing-page-builder/LandingPageBuilderEnhanced";
 import { LandingPage } from "@/components/landing-page-builder/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,7 +79,7 @@ export default function LandingPages() {
 
   if (view === "editor") {
     return (
-      <LandingPageBuilder
+      <LandingPageBuilderEnhanced
         pageId={selectedPageId || undefined}
         onBack={handleBackToList}
       />
