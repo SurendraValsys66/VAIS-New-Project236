@@ -172,22 +172,22 @@ export const AIBuilder: React.FC<AIBuilderProps> = ({ onBack, onGenerateComplete
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <div className="w-full max-w-3xl px-4">
-          {/* Back Button - Top Left */}
-          {onBack && (
-            <div className="mb-6">
-              <Button
-                onClick={onBack}
-                variant="outline"
-                className="rounded-2xl px-6 py-2"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back
-              </Button>
-            </div>
-          )}
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+        {/* Back Button - Top Right */}
+        {onBack && (
+          <div className="w-full flex justify-end mb-6 px-4">
+            <Button
+              onClick={onBack}
+              variant="outline"
+              className="rounded-2xl px-6 py-2"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back
+            </Button>
+          </div>
+        )}
 
+        <div className="w-full max-w-3xl px-4">
           {/* Error Alert */}
           {error && (
             <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50 mb-6">
