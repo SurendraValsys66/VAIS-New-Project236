@@ -1,9 +1,16 @@
 import { RequestHandler } from "express";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 interface LayoutSection {
   id: string;
@@ -64,7 +71,7 @@ Return ONLY a valid JSON object (no markdown, no extra text) with the following 
 
 Generate 4-6 sections that best fit the user's requirements. Ensure the layout flows logically. Use appropriate section types to create a cohesive landing page.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-3.5-turbo",
       max_tokens: 2000,
       messages: [
