@@ -114,6 +114,7 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
   const [groupPaddingValues, setGroupPaddingValues] = React.useState(false);
   const [groupMarginValues, setGroupMarginValues] = React.useState(false);
   const [showImageDialog, setShowImageDialog] = React.useState(false);
+  const [imageDialogUrl, setImageDialogUrl] = React.useState("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Use ref to track pending updates to debounce
@@ -141,30 +142,30 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
     if (component) {
       const props = component.props || {};
       setStyles({
-        backgroundColor: props.backgroundColor || "#ffffff",
-        textColor: props.textColor || "#000000",
-        fontSize: props.fontSize ? String(props.fontSize) : "16",
-        paddingTop: props.paddingTop ? String(props.paddingTop) : "0",
-        paddingRight: props.paddingRight ? String(props.paddingRight) : "0",
-        paddingBottom: props.paddingBottom ? String(props.paddingBottom) : "0",
-        paddingLeft: props.paddingLeft ? String(props.paddingLeft) : "0",
-        marginTop: props.marginTop ? String(props.marginTop) : "0",
-        marginRight: props.marginRight ? String(props.marginRight) : "0",
-        marginBottom: props.marginBottom ? String(props.marginBottom) : "0",
-        marginLeft: props.marginLeft ? String(props.marginLeft) : "0",
-        width: props.width ? String(props.width) : "100",
-        height: props.height ? String(props.height) : "",
-        borderRadius: props.borderRadius ? String(props.borderRadius) : "0",
-        borderColor: props.borderColor || "#000000",
-        borderWidth: props.borderWidth ? String(props.borderWidth) : "0",
-        textAlign: props.textAlign || "left",
-        justifyContent: props.justifyContent || "flex-start",
-        backgroundImageUrl: props.backgroundImageUrl || "",
-        backgroundSize: props.backgroundSize || "cover",
-        backgroundPosition: props.backgroundPosition || "center",
-        backgroundRepeat: props.backgroundRepeat || "no-repeat",
-        backgroundAttachment: props.backgroundAttachment || "scroll",
-        backgroundOpacity: props.backgroundOpacity ? String(props.backgroundOpacity) : "100",
+        backgroundColor: component.backgroundColor || props.backgroundColor || "#ffffff",
+        textColor: component.textColor || props.textColor || "#000000",
+        fontSize: component.fontSize ? String(component.fontSize) : (props.fontSize ? String(props.fontSize) : "16"),
+        paddingTop: component.paddingTop ? String(component.paddingTop) : (props.paddingTop ? String(props.paddingTop) : "0"),
+        paddingRight: component.paddingRight ? String(component.paddingRight) : (props.paddingRight ? String(props.paddingRight) : "0"),
+        paddingBottom: component.paddingBottom ? String(component.paddingBottom) : (props.paddingBottom ? String(props.paddingBottom) : "0"),
+        paddingLeft: component.paddingLeft ? String(component.paddingLeft) : (props.paddingLeft ? String(props.paddingLeft) : "0"),
+        marginTop: component.marginTop ? String(component.marginTop) : (props.marginTop ? String(props.marginTop) : "0"),
+        marginRight: component.marginRight ? String(component.marginRight) : (props.marginRight ? String(props.marginRight) : "0"),
+        marginBottom: component.marginBottom ? String(component.marginBottom) : (props.marginBottom ? String(props.marginBottom) : "0"),
+        marginLeft: component.marginLeft ? String(component.marginLeft) : (props.marginLeft ? String(props.marginLeft) : "0"),
+        width: component.width ? String(component.width) : (props.width ? String(props.width) : "100"),
+        height: component.height ? String(component.height) : (props.height ? String(props.height) : ""),
+        borderRadius: component.borderRadius ? String(component.borderRadius) : (props.borderRadius ? String(props.borderRadius) : "0"),
+        borderColor: component.borderColor || props.borderColor || "#000000",
+        borderWidth: component.borderWidth ? String(component.borderWidth) : (props.borderWidth ? String(props.borderWidth) : "0"),
+        textAlign: component.textAlign || props.textAlign || "left",
+        justifyContent: component.justifyContent || props.justifyContent || "flex-start",
+        backgroundImageUrl: component.backgroundImageUrl || props.backgroundImageUrl || "",
+        backgroundSize: component.backgroundSize || props.backgroundSize || "cover",
+        backgroundPosition: component.backgroundPosition || props.backgroundPosition || "center",
+        backgroundRepeat: component.backgroundRepeat || props.backgroundRepeat || "no-repeat",
+        backgroundAttachment: component.backgroundAttachment || props.backgroundAttachment || "scroll",
+        backgroundOpacity: component.backgroundOpacity ? String(component.backgroundOpacity) : (props.backgroundOpacity ? String(props.backgroundOpacity) : "100"),
       });
 
       // Initialize units from component
@@ -586,7 +587,10 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold text-gray-900">Add Image</h3>
                           <button
-                            onClick={() => setShowImageDialog(false)}
+                            onClick={() => {
+                              setShowImageDialog(false);
+                              setImageDialogUrl("");
+                            }}
                             className="text-gray-400 hover:text-gray-600"
                           >
                             <X className="w-5 h-5" />
@@ -621,16 +625,14 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                           <Input
                             type="text"
                             placeholder="https://example.com/image.jpg"
+                            value={imageDialogUrl}
+                            onChange={(e) => setImageDialogUrl(e.target.value)}
                             className="text-xs"
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' && e.currentTarget.value) {
-                                handleStyleChange("backgroundImageUrl", e.currentTarget.value);
+                              if (e.key === 'Enter' && imageDialogUrl) {
+                                handleStyleChange("backgroundImageUrl", imageDialogUrl);
                                 setShowImageDialog(false);
-                              }
-                            }}
-                            onBlur={(e) => {
-                              if (e.currentTarget.value) {
-                                handleStyleChange("backgroundImageUrl", e.currentTarget.value);
+                                setImageDialogUrl("");
                               }
                             }}
                           />
@@ -639,10 +641,26 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
 
                       <div className="p-6 border-t border-gray-200 flex gap-2 justify-end">
                         <button
-                          onClick={() => setShowImageDialog(false)}
+                          onClick={() => {
+                            setShowImageDialog(false);
+                            setImageDialogUrl("");
+                          }}
                           className="px-4 py-2 text-xs font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (imageDialogUrl) {
+                              handleStyleChange("backgroundImageUrl", imageDialogUrl);
+                              setShowImageDialog(false);
+                              setImageDialogUrl("");
+                            }
+                          }}
+                          disabled={!imageDialogUrl}
+                          className="px-4 py-2 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Add Image
                         </button>
                       </div>
                     </div>

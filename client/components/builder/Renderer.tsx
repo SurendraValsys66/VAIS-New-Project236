@@ -170,6 +170,41 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
       styles.backgroundColor = component.backgroundColor;
     }
 
+    // Apply background image properties (from ElementStylePanel)
+    if (component.backgroundImageUrl) {
+      // Use double quotes for URL and properly escape
+      const imageUrl = component.backgroundImageUrl.replace(/"/g, '\\"');
+      styles.backgroundImage = `url("${imageUrl}")`;
+      styles.backgroundSize = component.backgroundSize || "cover";
+      styles.backgroundPosition = component.backgroundPosition || "center";
+      styles.backgroundRepeat = component.backgroundRepeat || "no-repeat";
+      styles.backgroundAttachment = component.backgroundAttachment || "scroll";
+      // Ensure the component has proper dimensions to display background
+      if (!styles.minHeight && !component.height) {
+        styles.minHeight = "300px";
+      }
+    }
+
+    // Apply text color
+    if (component.textColor) {
+      styles.color = component.textColor;
+    }
+
+    // Apply opacity
+    if (component.backgroundOpacity !== undefined) {
+      styles.opacity = parseInt(String(component.backgroundOpacity)) / 100;
+    }
+
+    // Apply justify content
+    if (component.justifyContent) {
+      styles.justifyContent = component.justifyContent as any;
+    }
+
+    // Apply text alignment
+    if (component.textAlign) {
+      styles.textAlign = component.textAlign as any;
+    }
+
     return styles;
   };
 
@@ -248,19 +283,27 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
   switch (component.type) {
     // --- Layout ---
     case "section":
+      const sectionStyles = getComponentStyles();
       return wrapWithControls(
         <section
-          className="bg-white rounded-lg shadow-sm overflow-hidden"
-          style={getComponentStyles()}
+          className={cn(
+            "rounded-lg shadow-sm overflow-hidden",
+            !sectionStyles.backgroundColor && !sectionStyles.backgroundImage && "bg-white"
+          )}
+          style={sectionStyles}
         >
           {renderChildren()}
         </section>,
       );
     case "row":
+      const rowStyles = getComponentStyles();
       return wrapWithControls(
         <div
-          className="bg-gray-50/50 rounded p-1"
-          style={getComponentStyles()}
+          className={cn(
+            "rounded p-1",
+            !rowStyles.backgroundColor && !rowStyles.backgroundImage && "bg-gray-50/50"
+          )}
+          style={rowStyles}
         >
           {renderChildren()}
         </div>,

@@ -164,11 +164,20 @@ export const TestimonialsBlockPreview: React.FC<BlockPreviewProps> = ({
               className="bg-white p-6 rounded-lg shadow-md border border-gray-200"
             >
               <p className="text-gray-600 mb-4">{testimonial.quote}</p>
-              <div>
-                <p className="font-semibold text-gray-900">
-                  {testimonial.author}
-                </p>
-                <p className="text-sm text-gray-600">{testimonial.role}</p>
+              <div className="flex items-center gap-3">
+                {testimonial.avatarUrl && (
+                  <img
+                    src={testimonial.avatarUrl}
+                    alt={testimonial.author}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  />
+                )}
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {testimonial.author}
+                  </p>
+                  <p className="text-sm text-gray-600">{testimonial.role}</p>
+                </div>
               </div>
             </div>
           ))}
@@ -196,8 +205,16 @@ export const AboutBlockPreview: React.FC<BlockPreviewProps> = ({
       <div className="px-8 py-8">
         <div className="grid grid-cols-2 gap-8 items-center">
           {props.imagePosition === "left" && (
-            <div className="h-64 bg-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-gray-500">Image</span>
+            <div className="h-64 bg-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+              {props.imageUrl ? (
+                <img
+                  src={props.imageUrl}
+                  alt="About section image"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-500">Image</span>
+              )}
             </div>
           )}
           <div>
@@ -212,8 +229,16 @@ export const AboutBlockPreview: React.FC<BlockPreviewProps> = ({
             </button>
           </div>
           {props.imagePosition === "right" && (
-            <div className="h-64 bg-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-gray-500">Image</span>
+            <div className="h-64 bg-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+              {props.imageUrl ? (
+                <img
+                  src={props.imageUrl}
+                  alt="About section image"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-500">Image</span>
+              )}
             </div>
           )}
         </div>

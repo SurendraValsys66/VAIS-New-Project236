@@ -521,6 +521,14 @@ export const getBlockStyles = (props: Record<string, any>): React.CSSProperties 
   if (props.opacity) styles.opacity = parseInt(props.opacity) / 100;
   if (props.gap) styles.gap = formatSpacingValue(props.gap);
 
+  // Background image handling
+  if (props.backgroundImageUrl) {
+    styles.backgroundImage = `url('${props.backgroundImageUrl}')`;
+    styles.backgroundSize = props.backgroundSize || "cover";
+    styles.backgroundPosition = props.backgroundPosition || "center";
+    styles.backgroundRepeat = props.backgroundRepeat || "no-repeat";
+  }
+
   // Shadow mapping
   if (props.shadow && props.shadow !== "none") {
     const shadowMap: Record<string, string> = {
