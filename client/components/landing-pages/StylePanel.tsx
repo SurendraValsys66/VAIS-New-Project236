@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ChevronDown, Palette, Type, Box, Sparkles, ToggleLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -97,6 +104,21 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
 
   const [linkPaddingValues, setLinkPaddingValues] = useState(false);
   const [linkMarginValues, setLinkMarginValues] = useState(false);
+  const [paddingUnit, setPaddingUnit] = useState<"px" | "%">("px");
+  const [marginUnit, setMarginUnit] = useState<"px" | "%">("px");
+
+  // Validation helper for spacing values
+  const validateSpacingValue = (val: string, unit: "px" | "%"): string => {
+    const numVal = Number(val);
+    if (isNaN(numVal)) return "0";
+
+    // For percentage, cap at 100
+    if (unit === "%") {
+      return String(Math.min(100, Math.max(0, numVal)));
+    }
+    // For px, allow any non-negative value
+    return String(Math.max(0, numVal));
+  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -274,23 +296,32 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
                       type="number"
                       value={styles.paddingTop}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        updateStyle("paddingTop", val);
-                        updateStyle("paddingRight", val);
-                        updateStyle("paddingBottom", val);
-                        updateStyle("paddingLeft", val);
+                        const validated = validateSpacingValue(e.target.value, paddingUnit);
+                        updateStyle("paddingTop", validated);
+                        updateStyle("paddingRight", validated);
+                        updateStyle("paddingBottom", validated);
+                        updateStyle("paddingLeft", validated);
                       }}
                       className="w-12 text-xs h-7"
                     />
-                    <span className="text-xs text-gray-400">px</span>
+                    <Select value={paddingUnit} onValueChange={(val) => setPaddingUnit(val as "px" | "%")}>
+                      <SelectTrigger className="w-16 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="px">px</SelectItem>
+                        <SelectItem value="%">%</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <div className="flex flex-col gap-0 ml-auto">
                       <button
                         onClick={() => {
-                          const val = String(Number(styles.paddingTop) + 1);
-                          updateStyle("paddingTop", val);
-                          updateStyle("paddingRight", val);
-                          updateStyle("paddingBottom", val);
-                          updateStyle("paddingLeft", val);
+                          const newVal = String(Number(styles.paddingTop) + 1);
+                          const validated = validateSpacingValue(newVal, paddingUnit);
+                          updateStyle("paddingTop", validated);
+                          updateStyle("paddingRight", validated);
+                          updateStyle("paddingBottom", validated);
+                          updateStyle("paddingLeft", validated);
                         }}
                         className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                       >
@@ -298,11 +329,12 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
                       </button>
                       <button
                         onClick={() => {
-                          const val = String(Math.max(0, Number(styles.paddingTop) - 1));
-                          updateStyle("paddingTop", val);
-                          updateStyle("paddingRight", val);
-                          updateStyle("paddingBottom", val);
-                          updateStyle("paddingLeft", val);
+                          const newVal = String(Math.max(0, Number(styles.paddingTop) - 1));
+                          const validated = validateSpacingValue(newVal, paddingUnit);
+                          updateStyle("paddingTop", validated);
+                          updateStyle("paddingRight", validated);
+                          updateStyle("paddingBottom", validated);
+                          updateStyle("paddingLeft", validated);
                         }}
                         className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                       >
@@ -323,19 +355,38 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
                         <Input
                           type="number"
                           value={styles[key as keyof StyleState]}
-                          onChange={(e) => updateStyle(key as keyof StyleState, e.target.value)}
+                          onChange={(e) => {
+                            const validated = validateSpacingValue(e.target.value, paddingUnit);
+                            updateStyle(key as keyof StyleState, validated);
+                          }}
                           className="w-10 text-xs h-7"
                         />
-                        <span className="text-xs text-gray-400">px</span>
+                        <Select value={paddingUnit} onValueChange={(val) => setPaddingUnit(val as "px" | "%")}>
+                          <SelectTrigger className="w-14 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="px">px</SelectItem>
+                            <SelectItem value="%">%</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <div className="flex flex-col gap-0">
                           <button
-                            onClick={() => updateStyle(key as keyof StyleState, String(Number(styles[key as keyof StyleState]) + 1))}
+                            onClick={() => {
+                              const newVal = String(Number(styles[key as keyof StyleState]) + 1);
+                              const validated = validateSpacingValue(newVal, paddingUnit);
+                              updateStyle(key as keyof StyleState, validated);
+                            }}
                             className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                           >
                             ▲
                           </button>
                           <button
-                            onClick={() => updateStyle(key as keyof StyleState, String(Math.max(0, Number(styles[key as keyof StyleState]) - 1)))}
+                            onClick={() => {
+                              const newVal = String(Math.max(0, Number(styles[key as keyof StyleState]) - 1));
+                              const validated = validateSpacingValue(newVal, paddingUnit);
+                              updateStyle(key as keyof StyleState, validated);
+                            }}
                             className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                           >
                             ▼
@@ -368,23 +419,32 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
                       type="number"
                       value={styles.marginTop}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        updateStyle("marginTop", val);
-                        updateStyle("marginRight", val);
-                        updateStyle("marginBottom", val);
-                        updateStyle("marginLeft", val);
+                        const validated = validateSpacingValue(e.target.value, marginUnit);
+                        updateStyle("marginTop", validated);
+                        updateStyle("marginRight", validated);
+                        updateStyle("marginBottom", validated);
+                        updateStyle("marginLeft", validated);
                       }}
                       className="w-12 text-xs h-7"
                     />
-                    <span className="text-xs text-gray-400">px</span>
+                    <Select value={marginUnit} onValueChange={(val) => setMarginUnit(val as "px" | "%")}>
+                      <SelectTrigger className="w-16 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="px">px</SelectItem>
+                        <SelectItem value="%">%</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <div className="flex flex-col gap-0 ml-auto">
                       <button
                         onClick={() => {
-                          const val = String(Number(styles.marginTop) + 1);
-                          updateStyle("marginTop", val);
-                          updateStyle("marginRight", val);
-                          updateStyle("marginBottom", val);
-                          updateStyle("marginLeft", val);
+                          const newVal = String(Number(styles.marginTop) + 1);
+                          const validated = validateSpacingValue(newVal, marginUnit);
+                          updateStyle("marginTop", validated);
+                          updateStyle("marginRight", validated);
+                          updateStyle("marginBottom", validated);
+                          updateStyle("marginLeft", validated);
                         }}
                         className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                       >
@@ -392,11 +452,12 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
                       </button>
                       <button
                         onClick={() => {
-                          const val = String(Math.max(0, Number(styles.marginTop) - 1));
-                          updateStyle("marginTop", val);
-                          updateStyle("marginRight", val);
-                          updateStyle("marginBottom", val);
-                          updateStyle("marginLeft", val);
+                          const newVal = String(Math.max(0, Number(styles.marginTop) - 1));
+                          const validated = validateSpacingValue(newVal, marginUnit);
+                          updateStyle("marginTop", validated);
+                          updateStyle("marginRight", validated);
+                          updateStyle("marginBottom", validated);
+                          updateStyle("marginLeft", validated);
                         }}
                         className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                       >
@@ -417,19 +478,38 @@ export const StylePanel: React.FC<StylePanelProps> = ({ onClose }) => {
                         <Input
                           type="number"
                           value={styles[key as keyof StyleState]}
-                          onChange={(e) => updateStyle(key as keyof StyleState, e.target.value)}
+                          onChange={(e) => {
+                            const validated = validateSpacingValue(e.target.value, marginUnit);
+                            updateStyle(key as keyof StyleState, validated);
+                          }}
                           className="w-10 text-xs h-7"
                         />
-                        <span className="text-xs text-gray-400">px</span>
+                        <Select value={marginUnit} onValueChange={(val) => setMarginUnit(val as "px" | "%")}>
+                          <SelectTrigger className="w-14 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="px">px</SelectItem>
+                            <SelectItem value="%">%</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <div className="flex flex-col gap-0">
                           <button
-                            onClick={() => updateStyle(key as keyof StyleState, String(Number(styles[key as keyof StyleState]) + 1))}
+                            onClick={() => {
+                              const newVal = String(Number(styles[key as keyof StyleState]) + 1);
+                              const validated = validateSpacingValue(newVal, marginUnit);
+                              updateStyle(key as keyof StyleState, validated);
+                            }}
                             className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                           >
                             ▲
                           </button>
                           <button
-                            onClick={() => updateStyle(key as keyof StyleState, String(Math.max(0, Number(styles[key as keyof StyleState]) - 1)))}
+                            onClick={() => {
+                              const newVal = String(Math.max(0, Number(styles[key as keyof StyleState]) - 1));
+                              const validated = validateSpacingValue(newVal, marginUnit);
+                              updateStyle(key as keyof StyleState, validated);
+                            }}
                             className="text-xs text-gray-600 hover:text-gray-900 leading-3"
                           >
                             ▼

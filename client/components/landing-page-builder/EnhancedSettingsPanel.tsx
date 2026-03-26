@@ -83,47 +83,92 @@ const SpacingInput: React.FC<{
   unit: "px" | "%";
   onValueChange: (value: string) => void;
   onUnitChange: (unit: "px" | "%") => void;
-}> = ({ label, fullLabel, value, unit, onValueChange, onUnitChange }) => (
-  <div className="flex items-center gap-2" title={fullLabel}>
-    <span className="text-xs font-semibold text-gray-600 w-5">{label}</span>
-    <Input
-      type="number"
-      value={value}
-      onChange={(e) => onValueChange(e.target.value)}
-      className="w-12 text-xs h-8 text-center"
-      placeholder="0"
-    />
-    <Select value={unit} onValueChange={(val) => onUnitChange(val as "px" | "%")}>
-      <SelectTrigger className="w-16 h-8 text-xs">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="px">px</SelectItem>
-        <SelectItem value="%">%</SelectItem>
-      </SelectContent>
-    </Select>
-    <button
-      onClick={() => {
-        const current = Number(value || "0");
-        onValueChange(String(current + 1));
-      }}
-      className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2 py-1 rounded text-sm"
-      title="Increase"
-    >
-      ▲
-    </button>
-    <button
-      onClick={() => {
-        const current = Number(value || "0");
-        onValueChange(String(Math.max(0, current - 1)));
-      }}
-      className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2 py-1 rounded text-sm"
-      title="Decrease"
-    >
-      ▼
-    </button>
-  </div>
-);
+}> = ({ label, fullLabel, value, unit, onValueChange, onUnitChange }) => {
+  // Validate value based on unit
+  const validateValue = (val: string, currentUnit: "px" | "%"): string => {
+    const numVal = Number(val);
+    if (isNaN(numVal)) return "0";
+
+    // For percentage, cap at 0-100
+    if (currentUnit === "%") {
+      return String(Math.min(100, Math.max(0, numVal)));
+    }
+    // For px, allow any value including negative
+    return String(numVal);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const current = Number(value || "0");
+      const newVal = current + 1;
+      const validated = validateValue(String(newVal), unit);
+      onValueChange(validated);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const current = Number(value || "0");
+      const newVal = Math.max(0, current - 1);
+      const validated = validateValue(String(newVal), unit);
+      onValueChange(validated);
+    }
+  };
+
+  const handleInputChange = (inputValue: string) => {
+    const validated = validateValue(inputValue, unit);
+    onValueChange(validated);
+  };
+
+  const handleIncrement = () => {
+    const current = Number(value || "0");
+    const newVal = current + 1;
+    const validated = validateValue(String(newVal), unit);
+    onValueChange(validated);
+  };
+
+  const handleDecrement = () => {
+    const current = Number(value || "0");
+    const newVal = current - 1;
+    const validated = validateValue(String(newVal), unit);
+    onValueChange(validated);
+  };
+
+  return (
+    <div className="flex items-center gap-2" title={fullLabel}>
+      <span className="text-xs font-semibold text-gray-600 w-5">{label}</span>
+      <Input
+        type="number"
+        value={value}
+        onChange={(e) => handleInputChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        className="w-12 text-xs h-8 text-center"
+        placeholder="0"
+      />
+      <Select value={unit} onValueChange={(val) => onUnitChange(val as "px" | "%")}>
+        <SelectTrigger className="w-16 h-8 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="px">px</SelectItem>
+          <SelectItem value="%">%</SelectItem>
+        </SelectContent>
+      </Select>
+      <button
+        onClick={handleIncrement}
+        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2 py-1 rounded text-sm"
+        title="Increase"
+      >
+        ▲
+      </button>
+      <button
+        onClick={handleDecrement}
+        className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-2 py-1 rounded text-sm"
+        title="Decrease"
+      >
+        ▼
+      </button>
+    </div>
+  );
+};
 
 export const EnhancedSettingsPanel: React.FC<EnhancedSettingsPanelProps> = ({
   block,
@@ -640,7 +685,7 @@ export const EnhancedSettingsPanel: React.FC<EnhancedSettingsPanelProps> = ({
   return (
     <div className="bg-white border-l border-gray-200 h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
         <h3 className="font-semibold text-gray-900 text-sm capitalize">
           {block.type.replace("-", " ")} Settings
         </h3>
@@ -655,7 +700,7 @@ export const EnhancedSettingsPanel: React.FC<EnhancedSettingsPanelProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto relative">
         <Tabs defaultValue="content" className="w-full">
           <TabsList className="w-full justify-start rounded-none border-b bg-gray-50 px-4 h-10">
             <TabsTrigger value="content" className="rounded-none border-b-2">
