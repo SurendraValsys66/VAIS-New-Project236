@@ -41,6 +41,11 @@ interface SizingUnits {
   fontSize: "%" | "px";
 }
 
+interface SpacingUnits {
+  paddingUnit: "%" | "px";
+  marginUnit: "%" | "px";
+}
+
 export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
   component,
   onUpdate,
@@ -74,6 +79,11 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
     width: "%",
     height: "px",
     fontSize: "px",
+  });
+
+  const [spacingUnits, setSpacingUnits] = React.useState<SpacingUnits>({
+    paddingUnit: "px",
+    marginUnit: "px",
   });
 
   const [expandedSections, setExpandedSections] = React.useState({
@@ -194,6 +204,21 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
       // Update the component with the unit
       const updates: any = {};
       updates[`${property}Unit`] = newUnit; // Store the unit (widthUnit, heightUnit, fontSizeUnit)
+      onUpdate(updates);
+    },
+    [onUpdate]
+  );
+
+  const handleSpacingUnitChange = React.useCallback(
+    (property: keyof SpacingUnits, newUnit: "%" | "px") => {
+      setSpacingUnits((prev) => ({
+        ...prev,
+        [property]: newUnit,
+      }));
+
+      // Update the component with the unit
+      const updates: any = {};
+      updates[`${property}`] = newUnit;
       onUpdate(updates);
     },
     [onUpdate]
@@ -469,191 +494,255 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
         <div>
           <SectionHeader title="Spacing" section="spacing" />
           {expandedSections.spacing && (
-            <div className="px-4 py-4 space-y-6 bg-gray-50">
+            <div className="px-4 py-3 space-y-4 bg-gray-50">
               {/* Padding Section */}
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
                     Padding
                     <span className="text-gray-400 text-xs">ⓘ</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={spacing.groupPadding}
-                      onChange={handleGroupPaddingToggle}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-xs text-gray-600">Group sides</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={spacingUnits.paddingUnit}
+                      onChange={(e) => handleSpacingUnitChange("paddingUnit", e.target.value as "%" | "px")}
+                      className="px-2 py-1 h-6 border border-gray-200 rounded text-xs font-medium bg-white cursor-pointer hover:border-gray-300 transition-colors"
+                    >
+                      <option value="px">px</option>
+                      <option value="%">%</option>
+                    </select>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={spacing.groupPadding}
+                        onChange={handleGroupPaddingToggle}
+                        className="w-3 h-3"
+                      />
+                      <span className="text-xs text-gray-600">Group sides</span>
+                    </label>
+                  </div>
                 </div>
 
                 {spacing.groupPadding ? (
-                  <div className="space-y-2 px-2 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 flex items-center justify-center">
-                        <span className="text-xs text-gray-400">↕</span>
-                      </div>
-                      <Input
-                        type="number"
-                        value={styles.paddingTop}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          handleStyleChange("paddingTop", value);
-                          handleStyleChange("paddingRight", value);
-                          handleStyleChange("paddingBottom", value);
-                          handleStyleChange("paddingLeft", value);
+                  <div className="flex gap-2 items-center">
+                    <span className="text-xs text-gray-400">⊞</span>
+                    <Input
+                      type="number"
+                      value={styles.paddingTop}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (spacingUnits.paddingUnit === "%" && Number(value) > 100) {
+                          value = "100";
+                        }
+                        handleStyleChange("paddingTop", value);
+                        handleStyleChange("paddingRight", value);
+                        handleStyleChange("paddingBottom", value);
+                        handleStyleChange("paddingLeft", value);
+                      }}
+                      placeholder="0"
+                      max={spacingUnits.paddingUnit === "%" ? 100 : undefined}
+                      className="w-12 text-xs h-7"
+                    />
+                    <span className="text-xs text-gray-400">{spacingUnits.paddingUnit}</span>
+                    <div className="flex flex-col gap-0 ml-auto">
+                      <button
+                        onClick={() => {
+                          const current = Number(styles.paddingTop);
+                          const newVal = spacingUnits.paddingUnit === "%" ? Math.min(100, current + 1) : current + 1;
+                          const val = String(newVal);
+                          handleStyleChange("paddingTop", val);
+                          handleStyleChange("paddingRight", val);
+                          handleStyleChange("paddingBottom", val);
+                          handleStyleChange("paddingLeft", val);
                         }}
-                        placeholder="0"
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-gray-500 w-8 text-right">px</span>
+                        className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => {
+                          const val = String(Math.max(0, Number(styles.paddingTop) - 1));
+                          handleStyleChange("paddingTop", val);
+                          handleStyleChange("paddingRight", val);
+                          handleStyleChange("paddingBottom", val);
+                          handleStyleChange("paddingLeft", val);
+                        }}
+                        className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                      >
+                        ▼
+                      </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 px-2 py-3">
-                    {/* Top */}
-                    <div className="col-span-3 flex items-center gap-2">
-                      <ArrowUp className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.paddingTop}
-                        onChange={(e) => handleStyleChange("paddingTop", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm flex-1"
-                      />
-                      <span className="text-xs text-gray-500 w-6 text-right">px</span>
-                    </div>
-                    {/* Left, Center(spacer), Right */}
-                    <div className="flex items-center gap-2">
-                      <ArrowLeft className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.paddingLeft}
-                        onChange={(e) => handleStyleChange("paddingLeft", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-gray-500">px</span>
-                    </div>
-                    <div></div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.paddingRight}
-                        onChange={(e) => handleStyleChange("paddingRight", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-gray-500">px</span>
-                    </div>
-                    {/* Bottom */}
-                    <div className="col-span-3 flex items-center gap-2">
-                      <ArrowDown className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.paddingBottom}
-                        onChange={(e) => handleStyleChange("paddingBottom", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm flex-1"
-                      />
-                      <span className="text-xs text-gray-500 w-6 text-right">px</span>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { propKey: "paddingTop", label: "⊞" },
+                      { propKey: "paddingRight", label: "⊞" },
+                      { propKey: "paddingBottom", label: "⊞" },
+                      { propKey: "paddingLeft", label: "⊞" },
+                    ].map(({ propKey, label }) => (
+                      <div key={propKey} className="flex gap-1.5 items-center">
+                        <span className="text-xs text-gray-400">{label}</span>
+                        <Input
+                          type="number"
+                          value={styles[propKey as keyof StyleState]}
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            if (spacingUnits.paddingUnit === "%" && Number(value) > 100) {
+                              value = "100";
+                            }
+                            handleStyleChange(propKey as keyof StyleState, value);
+                          }}
+                          max={spacingUnits.paddingUnit === "%" ? 100 : undefined}
+                          className="w-10 text-xs h-7"
+                        />
+                        <span className="text-xs text-gray-400">{spacingUnits.paddingUnit}</span>
+                        <div className="flex flex-col gap-0">
+                          <button
+                            onClick={() => {
+                              const current = Number(styles[propKey as keyof StyleState]);
+                              const newVal = spacingUnits.paddingUnit === "%" ? Math.min(100, current + 1) : current + 1;
+                              handleStyleChange(propKey as keyof StyleState, String(newVal));
+                            }}
+                            className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                          >
+                            ▲
+                          </button>
+                          <button
+                            onClick={() => handleStyleChange(propKey as keyof StyleState, String(Math.max(0, Number(styles[propKey as keyof StyleState]) - 1)))}
+                            className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                          >
+                            ▼
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
               {/* Margin Section */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
+              <div className="border-t border-gray-200 pt-3">
+                <div className="flex items-center justify-between mb-3">
                   <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
                     Margin
                     <span className="text-gray-400 text-xs">ⓘ</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={spacing.groupMargin}
-                      onChange={handleGroupMarginToggle}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-xs text-gray-600">Group sides</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={spacingUnits.marginUnit}
+                      onChange={(e) => handleSpacingUnitChange("marginUnit", e.target.value as "%" | "px")}
+                      className="px-2 py-1 h-6 border border-gray-200 rounded text-xs font-medium bg-white cursor-pointer hover:border-gray-300 transition-colors"
+                    >
+                      <option value="px">px</option>
+                      <option value="%">%</option>
+                    </select>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={spacing.groupMargin}
+                        onChange={handleGroupMarginToggle}
+                        className="w-3 h-3"
+                      />
+                      <span className="text-xs text-gray-600">Group sides</span>
+                    </label>
+                  </div>
                 </div>
 
                 {spacing.groupMargin ? (
-                  <div className="space-y-2 px-2 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 flex items-center justify-center">
-                        <span className="text-xs text-gray-400">↕</span>
-                      </div>
-                      <Input
-                        type="number"
-                        value={styles.marginTop}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          handleStyleChange("marginTop", value);
-                          handleStyleChange("marginRight", value);
-                          handleStyleChange("marginBottom", value);
-                          handleStyleChange("marginLeft", value);
+                  <div className="flex gap-2 items-center">
+                    <span className="text-xs text-gray-400">⊞</span>
+                    <Input
+                      type="number"
+                      value={styles.marginTop}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (spacingUnits.marginUnit === "%" && Number(value) > 100) {
+                          value = "100";
+                        }
+                        handleStyleChange("marginTop", value);
+                        handleStyleChange("marginRight", value);
+                        handleStyleChange("marginBottom", value);
+                        handleStyleChange("marginLeft", value);
+                      }}
+                      placeholder="0"
+                      max={spacingUnits.marginUnit === "%" ? 100 : undefined}
+                      className="w-12 text-xs h-7"
+                    />
+                    <span className="text-xs text-gray-400">{spacingUnits.marginUnit}</span>
+                    <div className="flex flex-col gap-0 ml-auto">
+                      <button
+                        onClick={() => {
+                          const current = Number(styles.marginTop);
+                          const newVal = spacingUnits.marginUnit === "%" ? Math.min(100, current + 1) : current + 1;
+                          const val = String(newVal);
+                          handleStyleChange("marginTop", val);
+                          handleStyleChange("marginRight", val);
+                          handleStyleChange("marginBottom", val);
+                          handleStyleChange("marginLeft", val);
                         }}
-                        placeholder="0"
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-gray-500 w-8 text-right">px</span>
+                        className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => {
+                          const val = String(Math.max(0, Number(styles.marginTop) - 1));
+                          handleStyleChange("marginTop", val);
+                          handleStyleChange("marginRight", val);
+                          handleStyleChange("marginBottom", val);
+                          handleStyleChange("marginLeft", val);
+                        }}
+                        className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                      >
+                        ▼
+                      </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 px-2 py-3">
-                    {/* Top */}
-                    <div className="col-span-3 flex items-center gap-2">
-                      <ArrowUp className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.marginTop}
-                        onChange={(e) => handleStyleChange("marginTop", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm flex-1"
-                      />
-                      <span className="text-xs text-gray-500 w-6 text-right">px</span>
-                    </div>
-                    {/* Left, Center(spacer), Right */}
-                    <div className="flex items-center gap-2">
-                      <ArrowLeft className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.marginLeft}
-                        onChange={(e) => handleStyleChange("marginLeft", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-gray-500">px</span>
-                    </div>
-                    <div></div>
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.marginRight}
-                        onChange={(e) => handleStyleChange("marginRight", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-gray-500">px</span>
-                    </div>
-                    {/* Bottom */}
-                    <div className="col-span-3 flex items-center gap-2">
-                      <ArrowDown className="w-4 h-4 text-gray-400" />
-                      <Input
-                        type="number"
-                        value={styles.marginBottom}
-                        onChange={(e) => handleStyleChange("marginBottom", e.target.value)}
-                        placeholder="0"
-                        className="h-8 text-sm flex-1"
-                      />
-                      <span className="text-xs text-gray-500 w-6 text-right">px</span>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { propKey: "marginTop", label: "⊞" },
+                      { propKey: "marginRight", label: "⊞" },
+                      { propKey: "marginBottom", label: "⊞" },
+                      { propKey: "marginLeft", label: "⊞" },
+                    ].map(({ propKey, label }) => (
+                      <div key={propKey} className="flex gap-1.5 items-center">
+                        <span className="text-xs text-gray-400">{label}</span>
+                        <Input
+                          type="number"
+                          value={styles[propKey as keyof StyleState]}
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            if (spacingUnits.marginUnit === "%" && Number(value) > 100) {
+                              value = "100";
+                            }
+                            handleStyleChange(propKey as keyof StyleState, value);
+                          }}
+                          max={spacingUnits.marginUnit === "%" ? 100 : undefined}
+                          className="w-10 text-xs h-7"
+                        />
+                        <span className="text-xs text-gray-400">{spacingUnits.marginUnit}</span>
+                        <div className="flex flex-col gap-0">
+                          <button
+                            onClick={() => {
+                              const current = Number(styles[propKey as keyof StyleState]);
+                              const newVal = spacingUnits.marginUnit === "%" ? Math.min(100, current + 1) : current + 1;
+                              handleStyleChange(propKey as keyof StyleState, String(newVal));
+                            }}
+                            className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                          >
+                            ▲
+                          </button>
+                          <button
+                            onClick={() => handleStyleChange(propKey as keyof StyleState, String(Math.max(0, Number(styles[propKey as keyof StyleState]) - 1)))}
+                            className="text-xs text-gray-600 hover:text-gray-900 leading-3"
+                          >
+                            ▼
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
