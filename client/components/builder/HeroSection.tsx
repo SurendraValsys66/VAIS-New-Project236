@@ -259,11 +259,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 contentEditable={isSelected}
                 suppressContentEditableWarning
                 onInput={(e) => {
+                  // Don't update state on input - just let the user type freely
+                }}
+                onFocus={() => setEditingElementId(element.id)}
+                onBlur={(e) => {
+                  setEditingElementId(null);
                   const text = e.currentTarget.textContent || "";
                   handleElementUpdate(element.id, text);
                 }}
-                onFocus={() => setEditingElementId(element.id)}
-                onBlur={() => setEditingElementId(null)}
                 onClick={(e) => {
                   if (isSelected) e.stopPropagation();
                 }}
@@ -291,11 +294,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               contentEditable={isSelected}
               suppressContentEditableWarning
               onInput={(e) => {
+                // Don't update state on input - just let the user type freely
+              }}
+              onFocus={() => setEditingElementId(element.id)}
+              onBlur={(e) => {
+                setEditingElementId(null);
                 const text = e.currentTarget.textContent || "";
                 handleElementUpdate(element.id, text);
               }}
-              onFocus={() => setEditingElementId(element.id)}
-              onBlur={() => setEditingElementId(null)}
               onClick={(e) => {
                 if (isSelected) e.stopPropagation();
               }}
@@ -323,11 +329,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               contentEditable={isSelected}
               suppressContentEditableWarning
               onInput={(e) => {
+                // Don't update state on input - just let the user type freely
+              }}
+              onFocus={() => setEditingElementId(element.id)}
+              onBlur={(e) => {
+                setEditingElementId(null);
                 const text = e.currentTarget.textContent || "";
                 handleElementUpdate(element.id, text);
               }}
-              onFocus={() => setEditingElementId(element.id)}
-              onBlur={() => setEditingElementId(null)}
               onClick={(e) => {
                 if (isSelected) e.stopPropagation();
               }}
