@@ -16,6 +16,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { HeroSection } from "./HeroSection";
 
 interface RendererProps {
   component: BuilderComponent;
@@ -659,41 +660,13 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
     // --- Marketing Components ---
     case "hero":
       return wrapWithControls(
-        <div className="relative overflow-hidden bg-white p-12 lg:p-24 flex flex-col items-center text-center gap-6 rounded-3xl border border-gray-100" style={getComponentStyles()}>
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-valasys-orange/5 to-transparent pointer-events-none" />
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-valasys-orange/10 text-valasys-orange text-xs font-bold uppercase tracking-wider"
-            contentEditable
-            suppressContentEditableWarning
-          >
-            ✨ New Release
-          </div>
-          <h1
-            className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tight leading-none max-w-4xl"
-            contentEditable
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: 'Build your vision <span class="text-valasys-orange">faster</span> than ever.' }}
-          />
-          <p
-            className="text-lg text-gray-600 max-w-2xl leading-relaxed"
-            contentEditable
-            suppressContentEditableWarning
-          >
-            The world's most advanced landing page builder. Drag, drop, and launch in minutes, not
-            days.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
-            <Button className="px-10 py-7 text-lg font-bold rounded-2xl bg-valasys-orange shadow-xl hover:shadow-2xl transition-all hover:bg-valasys-orange/90">
-              Start Free Trial
-            </Button>
-            <Button
-              variant="outline"
-              className="px-10 py-7 text-lg font-bold rounded-2xl border-gray-200"
-            >
-              Watch Demo
-            </Button>
-          </div>
-        </div>,
+        <HeroSection
+          component={component}
+          onUpdate={onUpdate}
+          onRemove={onRemove}
+          onDuplicate={onDuplicate}
+          onSelect={onSelect}
+        />,
       );
 
     case "feature-grid":

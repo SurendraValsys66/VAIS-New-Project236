@@ -68,6 +68,10 @@ export interface BuilderComponent {
   videoUrl?: string;
   // Text content
   contentText?: string;
+  // Hero section properties
+  heroBadgeText?: string;
+  heroHeadingText?: string;
+  heroDescriptionText?: string;
 }
 
 export const DRAG_TYPES = {
