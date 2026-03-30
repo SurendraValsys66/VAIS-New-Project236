@@ -25,6 +25,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
   onSelect,
 }) => {
   const [selectedFeatureId, setSelectedFeatureId] = React.useState<string | null>(null);
+  const [hoveredCardId, setHoveredCardId] = React.useState<string | null>(null);
   const [hoveredElement, setHoveredElement] = React.useState<{
     featureId: string;
     element: "icon" | "title" | "description";
@@ -154,6 +155,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
   };
 
   const isSelected = (featureId: string) => selectedFeatureId === featureId;
+  const isCardHovered = (featureId: string) => hoveredCardId === featureId;
   const isElementHovered = (featureId: string, element: "icon" | "title" | "description") =>
     hoveredElement?.featureId === featureId && hoveredElement?.element === element;
 
@@ -198,8 +200,12 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                 "relative group transition-all rounded-lg p-4",
                 isSelected(feature.id)
                   ? "border-2 border-solid border-valasys-orange bg-valasys-orange/5 shadow-lg shadow-valasys-orange/20"
+                  : isCardHovered(feature.id)
+                  ? "border-2 border-dashed border-valasys-orange bg-gray-50"
                   : "border-2 border-transparent"
               )}
+              onMouseEnter={() => setHoveredCardId(feature.id)}
+              onMouseLeave={() => setHoveredCardId(null)}
               onClick={(e) => {
                 e.stopPropagation();
                 const newSelectedId = selectedFeatureId === feature.id ? null : feature.id;
