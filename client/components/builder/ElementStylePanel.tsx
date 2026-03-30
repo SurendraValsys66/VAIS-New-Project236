@@ -83,6 +83,13 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
   onUpdate,
   onClose,
 }) => {
+  const clampPercentWidth = React.useCallback((value: string) => {
+    if (value === "") return "";
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) return value;
+    return String(Math.min(100, Math.max(0, numericValue)));
+  }, []);
+
   const [styles, setStyles] = React.useState<StyleState>({
     backgroundColor: "#ffffff",
     textColor: "#000000",
@@ -262,13 +269,13 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
         heroPrimaryButtonText: component.heroPrimaryButtonText || "",
         heroSecondaryButtonText: component.heroSecondaryButtonText || "",
         // Hero element sizing
-        badgeWidth: component.badgeWidth ? String(component.badgeWidth) : "",
+        badgeWidth: component.badgeWidth ? clampPercentWidth(String(component.badgeWidth)) : "",
         badgeFontSize: component.badgeFontSize ? String(component.badgeFontSize) : "",
-        headingWidth: component.headingWidth ? String(component.headingWidth) : "",
+        headingWidth: component.headingWidth ? clampPercentWidth(String(component.headingWidth)) : "",
         headingFontSize: component.headingFontSize ? String(component.headingFontSize) : "",
-        paragraphWidth: component.paragraphWidth ? String(component.paragraphWidth) : "",
+        paragraphWidth: component.paragraphWidth ? clampPercentWidth(String(component.paragraphWidth)) : "",
         paragraphFontSize: component.paragraphFontSize ? String(component.paragraphFontSize) : "",
-        buttonWidth: component.buttonWidth ? String(component.buttonWidth) : "",
+        buttonWidth: component.buttonWidth ? clampPercentWidth(String(component.buttonWidth)) : "",
         buttonFontSize: component.buttonFontSize ? String(component.buttonFontSize) : "",
         selectedHeroElement: component.selectedHeroElement || "",
       });
@@ -296,14 +303,19 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
     component?.buttonWidth,
     component?.buttonFontSize,
     component?.selectedHeroElement,
+    clampPercentWidth,
   ]);
 
   const handleStyleChange = React.useCallback(
     (key: keyof StyleState, value: string | string[] | "all" | "desktop" | "tablet" | "mobile") => {
       // Update local state immediately for responsive UI
+      const nextValue =
+        key === "badgeWidth" || key === "headingWidth" || key === "paragraphWidth" || key === "buttonWidth"
+          ? clampPercentWidth(value as string)
+          : value;
       setStyles((prev) => ({
         ...prev,
-        [key]: value,
+        [key]: nextValue,
       }));
 
       // Prepare the update for the parent
@@ -327,7 +339,7 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
         key === "buttonFontSize" ||
         key === "selectedHeroElement"
       ) {
-        updates[key] = value;
+        updates[key] = nextValue;
       } else if (key === "displayConditions" || key === "contentVisibility") {
         // These are special properties that don't need conversion
         updates[key] = value;
@@ -376,7 +388,7 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
         pendingUpdatesRef.current = {};
       }, 300); // 300ms debounce
     },
-    [onUpdate]
+    [onUpdate, clampPercentWidth]
   );
 
   const handleGroupPaddingToggle = () => {
@@ -816,6 +828,8 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                         type="number"
                         value={styles.badgeWidth}
                         onChange={(e) => handleStyleChange("badgeWidth" as any, e.target.value)}
+                        min={0}
+                        max={100}
                         placeholder="auto"
                         className="flex-1 text-xs h-8"
                       />
@@ -844,6 +858,8 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                         type="number"
                         value={styles.headingWidth}
                         onChange={(e) => handleStyleChange("headingWidth" as any, e.target.value)}
+                        min={0}
+                        max={100}
                         placeholder="auto"
                         className="flex-1 text-xs h-8"
                       />
@@ -872,6 +888,8 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                         type="number"
                         value={styles.paragraphWidth}
                         onChange={(e) => handleStyleChange("paragraphWidth" as any, e.target.value)}
+                        min={0}
+                        max={100}
                         placeholder="auto"
                         className="flex-1 text-xs h-8"
                       />
@@ -900,6 +918,8 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                         type="number"
                         value={styles.buttonWidth}
                         onChange={(e) => handleStyleChange("buttonWidth" as any, e.target.value)}
+                        min={0}
+                        max={100}
                         placeholder="auto"
                         className="flex-1 text-xs h-8"
                       />
