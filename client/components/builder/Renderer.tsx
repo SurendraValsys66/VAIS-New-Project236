@@ -315,6 +315,9 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
   const [selectedPricingPlan, setSelectedPricingPlan] = React.useState<string | null>(null);
   const [hoveredPricingText, setHoveredPricingText] = React.useState<string | null>(null);
   const [selectedPricingText, setSelectedPricingText] = React.useState<string | null>(null);
+  const [hoveredPricingField, setHoveredPricingField] = React.useState<string | null>(null);
+  const [selectedPricingField, setSelectedPricingField] = React.useState<string | null>(null);
+  const [copiedPricingField, setCopiedPricingField] = React.useState<string | null>(null);
 
   const pricingHeadingText = component.pricingHeadingText ?? "Simple, transparent pricing";
   const pricingSubheadingText = component.pricingSubheadingText ?? "Choose the plan that's right for you.";
@@ -402,7 +405,213 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
     setSelectedPricingPlan((currentPlanId) =>
       currentPlanId === planId ? null : currentPlanId,
     );
+    setSelectedPricingField((currentField) =>
+      currentField?.startsWith(`${planId}:`) ? null : currentField,
+    );
+    setHoveredPricingField((currentField) =>
+      currentField?.startsWith(`${planId}:`) ? null : currentField,
+    );
   };
+
+  const getPricingFieldId = (
+    planId: string,
+    field: "name" | "price" | "features" | "button",
+  ) => `${planId}:${field}`;
+
+  const showPricingCopyFeedback = (fieldId: string) => {
+    setCopiedPricingField(fieldId);
+    window.setTimeout(() => {
+      setCopiedPricingField((currentField) =>
+        currentField === fieldId ? null : currentField,
+      );
+    }, 1500);
+  };
+
+  const copyPricingFieldText = (fieldId: string, value: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(value);
+    }
+    showPricingCopyFeedback(fieldId);
+  };
+
+  const duplicatePricingValue = (value: string, fallback: string) =>
+    `${value.trim() || fallback} Copy`;
+
+  const selectPricingText = (field: "heading" | "subheading") => {
+    setSelectedPricingField(null);
+    setSelectedPricingText((currentText) =>
+      currentText === field ? null : field,
+    );
+    onSelect?.(component.id);
+  };
+
+  const selectPricingField = (planId: string, field: "name" | "price" | "features" | "button") => {
+    setSelectedPricingText(null);
+    setSelectedPricingPlan(planId);
+    setSelectedPricingField((currentField) => {
+      const nextField = getPricingFieldId(planId, field);
+      return currentField === nextField ? null : nextField;
+    });
+    onSelect?.(component.id);
+  };
+
+  const handleDuplicatePricingText = (field: "heading" | "subheading") => {
+    if (field === "heading") {
+      onUpdate(component.id, {
+        pricingHeadingText: duplicatePricingValue(
+          pricingHeadingText,
+          "Simple, transparent pricing",
+        ),
+      });
+      return;
+    }
+
+    onUpdate(component.id, {
+      pricingSubheadingText: duplicatePricingValue(
+        pricingSubheadingText,
+        "Choose the plan that's right for you.",
+      ),
+    });
+  };
+
+  const handleDeletePricingText = (field: "heading" | "subheading") => {
+    if (field === "heading") {
+      onUpdate(component.id, { pricingHeadingText: "" });
+      if (selectedPricingText === "heading") {
+        setSelectedPricingText(null);
+      }
+      return;
+    }
+
+    onUpdate(component.id, { pricingSubheadingText: "" });
+    if (selectedPricingText === "subheading") {
+      setSelectedPricingText(null);
+    }
+  };
+
+  const handleDuplicatePricingField = (
+    planId: string,
+    field: "name" | "price" | "features" | "button",
+  ) => {
+    const plan = pricingPlans.find((entry) => entry.id === planId);
+
+    if (!plan) {
+      return;
+    }
+
+    if (field === "name") {
+      updatePricingPlan(planId, {
+        name: duplicatePricingValue(plan.name, "Plan name"),
+      });
+      return;
+    }
+
+    if (field === "price") {
+      updatePricingPlan(planId, {
+        price: duplicatePricingValue(plan.price, "$0"),
+      });
+      return;
+    }
+
+    if (field === "features") {
+      updatePricingPlan(planId, {
+        features: [...plan.features, `Benefit number ${plan.features.length + 1}`],
+      });
+      return;
+    }
+
+    updatePricingPlan(planId, {
+      buttonText: duplicatePricingValue(plan.buttonText, "Choose plan"),
+    });
+  };
+
+  const handleDeletePricingField = (
+    planId: string,
+    field: "name" | "price" | "features" | "button",
+  ) => {
+    const plan = pricingPlans.find((entry) => entry.id === planId);
+
+    if (!plan) {
+      return;
+    }
+
+    if (field === "name") {
+      updatePricingPlan(planId, { name: "" });
+      return;
+    }
+
+    if (field === "price") {
+      updatePricingPlan(planId, { price: "" });
+      return;
+    }
+
+    if (field === "features") {
+      updatePricingPlan(planId, {
+        features: plan.features.slice(0, -1),
+      });
+      return;
+    }
+
+    updatePricingPlan(planId, { buttonText: "" });
+  };
+
+  const renderPricingActionBar = (
+    fieldId: string,
+    onCopy: () => void,
+    onAdd: () => void,
+    onDelete: () => void,
+    copyTitle: string,
+    addTitle: string,
+    deleteTitle: string,
+    deleteDisabled = false,
+  ) => (
+    <div className="absolute right-2 top-2 z-20 flex items-center gap-1 rounded-full border border-gray-200 bg-white/95 p-1 shadow-lg">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 hover:bg-valasys-orange/10"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onCopy();
+        }}
+        title={copyTitle}
+      >
+        {copiedPricingField === fieldId ? (
+          <Check className="h-3.5 w-3.5" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 hover:bg-valasys-orange/10"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onAdd();
+        }}
+        title={addTitle}
+      >
+        <Plus className="h-3.5 w-3.5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 text-red-500 hover:bg-red-50 hover:text-red-600"
+        disabled={deleteDisabled}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete();
+        }}
+        title={deleteTitle}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
 
   if (!isVisibleOnPreviewDevice()) {
     return null;
@@ -896,7 +1105,7 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
         <div className="p-12 bg-white rounded-3xl border border-gray-100" style={getComponentStyles()}>
           <div className="text-center mb-12">
             <div
-              className="mb-4 inline-block w-fit rounded-2xl px-4 py-2 transition-all mx-auto"
+              className="relative mx-auto mb-4 inline-block w-fit rounded-2xl px-4 py-2 transition-all"
               onMouseEnter={() => setHoveredPricingText("heading")}
               onMouseLeave={() =>
                 setHoveredPricingText((currentText) =>
@@ -905,10 +1114,7 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
               }
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedPricingText((currentText) =>
-                  currentText === "heading" ? null : "heading",
-                );
-                onSelect?.(component.id);
+                selectPricingText("heading");
               }}
               style={{
                 display: "inline-block",
@@ -920,10 +1126,26 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
                       : "2px solid transparent",
               }}
             >
+              {selectedPricingText === "heading" &&
+                renderPricingActionBar(
+                  "heading",
+                  () => copyPricingFieldText("heading", pricingHeadingText),
+                  () => handleDuplicatePricingText("heading"),
+                  () => handleDeletePricingText("heading"),
+                  "Copy heading text",
+                  "Duplicate heading text",
+                  "Delete heading text",
+                )}
               <h2
                 className="text-2xl font-black focus:outline-none focus:ring-0"
                 contentEditable
                 suppressContentEditableWarning
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => {
+                  setSelectedPricingField(null);
+                  setSelectedPricingText("heading");
+                  onSelect?.(component.id);
+                }}
                 onInput={(e) =>
                   onUpdate(component.id, {
                     pricingHeadingText: e.currentTarget.textContent ?? "",
@@ -935,7 +1157,7 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
               </h2>
             </div>
             <div
-              className="mx-auto inline-block w-fit rounded-2xl px-4 py-2 transition-all"
+              className="relative mx-auto inline-block w-fit rounded-2xl px-4 py-2 transition-all"
               onMouseEnter={() => setHoveredPricingText("subheading")}
               onMouseLeave={() =>
                 setHoveredPricingText((currentText) =>
@@ -944,10 +1166,7 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
               }
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedPricingText((currentText) =>
-                  currentText === "subheading" ? null : "subheading",
-                );
-                onSelect?.(component.id);
+                selectPricingText("subheading");
               }}
               style={{
                 display: "inline-block",
@@ -959,10 +1178,26 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
                       : "2px solid transparent",
               }}
             >
+              {selectedPricingText === "subheading" &&
+                renderPricingActionBar(
+                  "subheading",
+                  () => copyPricingFieldText("subheading", pricingSubheadingText),
+                  () => handleDuplicatePricingText("subheading"),
+                  () => handleDeletePricingText("subheading"),
+                  "Copy subheading text",
+                  "Duplicate subheading text",
+                  "Delete subheading text",
+                )}
               <p
                 className="text-gray-500 focus:outline-none focus:ring-0"
                 contentEditable
                 suppressContentEditableWarning
+                onClick={(e) => e.stopPropagation()}
+                onFocus={() => {
+                  setSelectedPricingField(null);
+                  setSelectedPricingText("subheading");
+                  onSelect?.(component.id);
+                }}
                 onInput={(e) =>
                   onUpdate(component.id, {
                     pricingSubheadingText: e.currentTarget.textContent ?? "",
@@ -979,6 +1214,10 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
               const isFeaturedPlan = Boolean(plan.isFeatured);
               const isHoveredPlan = hoveredPricingPlan === plan.id;
               const isSelectedPlan = selectedPricingPlan === plan.id;
+              const nameFieldId = getPricingFieldId(plan.id, "name");
+              const priceFieldId = getPricingFieldId(plan.id, "price");
+              const featuresFieldId = getPricingFieldId(plan.id, "features");
+              const buttonFieldId = getPricingFieldId(plan.id, "button");
 
               return (
                 <div
@@ -1056,84 +1295,228 @@ export const ComponentRenderer: React.FC<RendererProps> = ({
                       Most Popular
                     </span>
                   )}
-                  <div>
-                    <h3
-                      className="mb-1 text-xl font-bold focus:outline-none"
-                      contentEditable
-                      suppressContentEditableWarning
-                      onInput={(e) =>
-                        updatePricingPlan(plan.id, {
-                          name: e.currentTarget.textContent ?? "",
-                        })
+                  <div className="space-y-4">
+                    <div
+                      className={cn(
+                        "relative rounded-2xl p-3 transition-all",
+                        selectedPricingField === nameFieldId && "border-2 border-valasys-orange bg-orange-50",
+                        hoveredPricingField === nameFieldId && selectedPricingField !== nameFieldId && "border-2 border-dashed border-valasys-orange",
+                        hoveredPricingField !== nameFieldId && selectedPricingField !== nameFieldId && "border-2 border-transparent",
+                      )}
+                      onMouseEnter={() => setHoveredPricingField(nameFieldId)}
+                      onMouseLeave={() =>
+                        setHoveredPricingField((currentField) =>
+                          currentField === nameFieldId ? null : currentField,
+                        )
                       }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        selectPricingField(plan.id, "name");
+                      }}
                     >
-                      {plan.name}
-                    </h3>
-                    <div className="flex items-baseline gap-1">
-                      <span
-                        className="text-3xl font-black focus:outline-none"
+                      {selectedPricingField === nameFieldId &&
+                        renderPricingActionBar(
+                          nameFieldId,
+                          () => copyPricingFieldText(nameFieldId, plan.name),
+                          () => handleDuplicatePricingField(plan.id, "name"),
+                          () => handleDeletePricingField(plan.id, "name"),
+                          "Copy plan name",
+                          "Duplicate plan name",
+                          "Delete plan name",
+                        )}
+                      <h3
+                        className="mb-1 text-xl font-bold focus:outline-none"
                         contentEditable
                         suppressContentEditableWarning
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => {
+                          setSelectedPricingText(null);
+                          setSelectedPricingPlan(plan.id);
+                          setSelectedPricingField(nameFieldId);
+                          onSelect?.(component.id);
+                        }}
                         onInput={(e) =>
                           updatePricingPlan(plan.id, {
-                            price: e.currentTarget.textContent ?? "",
+                            name: e.currentTarget.textContent ?? "",
                           })
                         }
                       >
-                        {plan.price}
-                      </span>
-                      <span className="text-sm text-gray-400">
-                        {plan.period || "/mo"}
-                      </span>
+                        {plan.name}
+                      </h3>
                     </div>
-                  </div>
-                  <ul className="flex-1 space-y-3">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li
-                        key={`${plan.id}-${featureIndex}`}
-                        className="flex items-center gap-3 text-sm text-gray-600"
-                      >
-                        <Check className="h-4 w-4 text-green-500" />
+                    <div
+                      className={cn(
+                        "relative rounded-2xl p-3 transition-all",
+                        selectedPricingField === priceFieldId && "border-2 border-valasys-orange bg-orange-50",
+                        hoveredPricingField === priceFieldId && selectedPricingField !== priceFieldId && "border-2 border-dashed border-valasys-orange",
+                        hoveredPricingField !== priceFieldId && selectedPricingField !== priceFieldId && "border-2 border-transparent",
+                      )}
+                      onMouseEnter={() => setHoveredPricingField(priceFieldId)}
+                      onMouseLeave={() =>
+                        setHoveredPricingField((currentField) =>
+                          currentField === priceFieldId ? null : currentField,
+                        )
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        selectPricingField(plan.id, "price");
+                      }}
+                    >
+                      {selectedPricingField === priceFieldId &&
+                        renderPricingActionBar(
+                          priceFieldId,
+                          () => copyPricingFieldText(priceFieldId, `${plan.price}${plan.period || "/mo"}`),
+                          () => handleDuplicatePricingField(plan.id, "price"),
+                          () => handleDeletePricingField(plan.id, "price"),
+                          "Copy amount",
+                          "Duplicate amount",
+                          "Delete amount",
+                        )}
+                      <div className="flex items-baseline gap-1">
                         <span
-                          className="focus:outline-none"
+                          className="text-3xl font-black focus:outline-none"
                           contentEditable
                           suppressContentEditableWarning
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={() => {
+                            setSelectedPricingText(null);
+                            setSelectedPricingPlan(plan.id);
+                            setSelectedPricingField(priceFieldId);
+                            onSelect?.(component.id);
+                          }}
                           onInput={(e) =>
-                            updatePricingFeature(
-                              plan.id,
-                              featureIndex,
-                              e.currentTarget.textContent ?? "",
-                            )
+                            updatePricingPlan(plan.id, {
+                              price: e.currentTarget.textContent ?? "",
+                            })
                           }
                         >
-                          {feature}
+                          {plan.price}
                         </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
+                        <span className="text-sm text-gray-400">
+                          {plan.period || "/mo"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div
                     className={cn(
-                      "w-full rounded-xl py-6 font-bold",
-                      isFeaturedPlan
-                        ? "bg-valasys-orange hover:bg-valasys-orange/90"
-                        : "bg-gray-900 hover:bg-gray-800",
+                      "relative flex-1 rounded-2xl p-3 transition-all",
+                      selectedPricingField === featuresFieldId && "border-2 border-valasys-orange bg-orange-50",
+                      hoveredPricingField === featuresFieldId && selectedPricingField !== featuresFieldId && "border-2 border-dashed border-valasys-orange",
+                      hoveredPricingField !== featuresFieldId && selectedPricingField !== featuresFieldId && "border-2 border-transparent",
                     )}
-                    onClick={(e) => e.preventDefault()}
+                    onMouseEnter={() => setHoveredPricingField(featuresFieldId)}
+                    onMouseLeave={() =>
+                      setHoveredPricingField((currentField) =>
+                        currentField === featuresFieldId ? null : currentField,
+                      )
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectPricingField(plan.id, "features");
+                    }}
                   >
-                    <span
-                      className="focus:outline-none"
-                      contentEditable
-                      suppressContentEditableWarning
-                      onClick={(e) => e.stopPropagation()}
-                      onInput={(e) =>
-                        updatePricingPlan(plan.id, {
-                          buttonText: e.currentTarget.textContent ?? "",
-                        })
-                      }
+                    {selectedPricingField === featuresFieldId &&
+                      renderPricingActionBar(
+                        featuresFieldId,
+                        () => copyPricingFieldText(featuresFieldId, plan.features.join("\n")),
+                        () => handleDuplicatePricingField(plan.id, "features"),
+                        () => handleDeletePricingField(plan.id, "features"),
+                        "Copy benefits",
+                        "Add benefit",
+                        plan.features.length === 0 ? "No benefits to delete" : "Delete last benefit",
+                        plan.features.length === 0,
+                      )}
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li
+                          key={`${plan.id}-${featureIndex}`}
+                          className="flex items-center gap-3 text-sm text-gray-600"
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                          <span
+                            className="focus:outline-none"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onClick={(e) => e.stopPropagation()}
+                            onFocus={() => {
+                              setSelectedPricingText(null);
+                              setSelectedPricingPlan(plan.id);
+                              setSelectedPricingField(featuresFieldId);
+                              onSelect?.(component.id);
+                            }}
+                            onInput={(e) =>
+                              updatePricingFeature(
+                                plan.id,
+                                featureIndex,
+                                e.currentTarget.textContent ?? "",
+                              )
+                            }
+                          >
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div
+                    className={cn(
+                      "relative rounded-2xl p-3 transition-all",
+                      selectedPricingField === buttonFieldId && "border-2 border-valasys-orange bg-orange-50",
+                      hoveredPricingField === buttonFieldId && selectedPricingField !== buttonFieldId && "border-2 border-dashed border-valasys-orange",
+                      hoveredPricingField !== buttonFieldId && selectedPricingField !== buttonFieldId && "border-2 border-transparent",
+                    )}
+                    onMouseEnter={() => setHoveredPricingField(buttonFieldId)}
+                    onMouseLeave={() =>
+                      setHoveredPricingField((currentField) =>
+                        currentField === buttonFieldId ? null : currentField,
+                      )
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectPricingField(plan.id, "button");
+                    }}
+                  >
+                    {selectedPricingField === buttonFieldId &&
+                      renderPricingActionBar(
+                        buttonFieldId,
+                        () => copyPricingFieldText(buttonFieldId, plan.buttonText),
+                        () => handleDuplicatePricingField(plan.id, "button"),
+                        () => handleDeletePricingField(plan.id, "button"),
+                        "Copy button text",
+                        "Duplicate button text",
+                        "Delete button text",
+                      )}
+                    <Button
+                      className={cn(
+                        "w-full rounded-xl py-6 font-bold",
+                        isFeaturedPlan
+                          ? "bg-valasys-orange hover:bg-valasys-orange/90"
+                          : "bg-gray-900 hover:bg-gray-800",
+                      )}
+                      onClick={(e) => e.preventDefault()}
                     >
-                      {plan.buttonText}
-                    </span>
-                  </Button>
+                      <span
+                        className="focus:outline-none"
+                        contentEditable
+                        suppressContentEditableWarning
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={() => {
+                          setSelectedPricingText(null);
+                          setSelectedPricingPlan(plan.id);
+                          setSelectedPricingField(buttonFieldId);
+                          onSelect?.(component.id);
+                        }}
+                        onInput={(e) =>
+                          updatePricingPlan(plan.id, {
+                            buttonText: e.currentTarget.textContent ?? "",
+                          })
+                        }
+                      >
+                        {plan.buttonText}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               );
             })}
