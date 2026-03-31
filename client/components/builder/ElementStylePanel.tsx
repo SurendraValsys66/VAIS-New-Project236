@@ -446,6 +446,11 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
         key === "heroDescriptionText" ||
         key === "heroPrimaryButtonText" ||
         key === "heroSecondaryButtonText" ||
+        key === "featureIcon" ||
+        key === "featureTitle" ||
+        key === "featureDescription" ||
+        key === "featureGridHeading" ||
+        key === "featureGridDescription" ||
         key === "badgeWidth" ||
         key === "headingWidth" ||
         key === "paragraphWidth" ||
@@ -474,6 +479,11 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
         key === "heroDescriptionText" ||
         key === "heroPrimaryButtonText" ||
         key === "heroSecondaryButtonText" ||
+        key === "featureIcon" ||
+        key === "featureTitle" ||
+        key === "featureDescription" ||
+        key === "featureGridHeading" ||
+        key === "featureGridDescription" ||
         key === "badgeWidth" ||
         key === "badgeFontSize" ||
         key === "headingWidth" ||
@@ -1145,11 +1155,12 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
           </div>
         )}
 
-        {/* Alignment Section */}
-        <div>
-          <SectionHeader title="Alignment" section="alignment" />
-          {expandedSections.alignment && (
-            <div className="px-4 py-4 space-y-4 bg-gray-50">
+        {/* Alignment Section - Hide when editing feature-grid content */}
+        {!(component?.type === "feature-grid" && (component?.selectedFeatureId || component?.selectedHeaderElement)) && (
+          <div>
+            <SectionHeader title="Alignment" section="alignment" />
+            {expandedSections.alignment && (
+              <div className="px-4 py-4 space-y-4 bg-gray-50">
               {/* Text Alignment */}
               <div>
                 <label className="text-xs font-semibold text-gray-700 block mb-2">
@@ -1219,9 +1230,10 @@ export const ElementStylePanel: React.FC<ElementStylePanelProps> = ({
                   })}
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Background Section */}
         <div>
