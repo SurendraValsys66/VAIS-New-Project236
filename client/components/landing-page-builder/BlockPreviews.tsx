@@ -380,9 +380,34 @@ export const PricingBlockPreview: React.FC<BlockPreviewProps> = ({
   block,
   isSelected,
   onSelect,
+  onUpdate,
 }) => {
   const props = block.properties;
   const blockStyles = getBlockStyles(props);
+  const [hoveredTierId, setHoveredTierId] = React.useState<string | null>(null);
+  const [selectedTierId, setSelectedTierId] = React.useState<string | null>(null);
+
+  const handleTierClick = (e: React.MouseEvent, tierId: string) => {
+    e.stopPropagation();
+    setSelectedTierId(selectedTierId === tierId ? null : tierId);
+  };
+
+  const handleCopyTier = (e: React.MouseEvent, tier: any) => {
+    e.stopPropagation();
+    const tierText = `${tier.name} - ${tier.price} - ${tier.features?.join(", ")}`;
+    navigator.clipboard.writeText(tierText);
+    alert("Tier copied to clipboard!");
+  };
+
+  const handleDeleteTier = (e: React.MouseEvent, tierId: string) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this pricing tier?")) {
+      const updatedTiers = props.pricingTiers?.filter((t: any) => t.id !== tierId) || [];
+      onUpdate({ pricingTiers: updatedTiers });
+      setSelectedTierId(null);
+    }
+  };
+
   return (
     <div
       onClick={onSelect}
@@ -400,11 +425,24 @@ export const PricingBlockPreview: React.FC<BlockPreviewProps> = ({
           {props.pricingTiers?.map((tier: any) => (
             <div
               key={tier.id}
-              className={`rounded-lg p-8 text-center transition-all ${
+              className={`rounded-lg p-8 text-center transition-all relative cursor-pointer ${
                 tier.isHighlighted
                   ? "bg-gray-900 text-white shadow-lg scale-105"
-                  : "bg-white border border-gray-200"
+                  : "bg-white"
               }`}
+              style={{
+                borderStyle: selectedTierId === tier.id ? "solid" : hoveredTierId === tier.id ? "dotted" : "solid",
+                borderWidth: "2px",
+                borderColor:
+                  selectedTierId === tier.id
+                    ? "#FF6A00"
+                    : hoveredTierId === tier.id
+                    ? "#FF6A00"
+                    : "#e5e7eb",
+              }}
+              onMouseEnter={() => setHoveredTierId(tier.id)}
+              onMouseLeave={() => setHoveredTierId(null)}
+              onClick={(e) => handleTierClick(e, tier.id)}
             >
               <h3 className="text-lg font-semibold mb-2">{tier.name}</h3>
               <div className="text-4xl font-bold mb-2">{tier.price}</div>
@@ -431,6 +469,25 @@ export const PricingBlockPreview: React.FC<BlockPreviewProps> = ({
               >
                 {tier.buttonText}
               </button>
+
+              {selectedTierId === tier.id && (
+                <div className="mt-4 flex gap-2 pt-4 border-t border-gray-300">
+                  <button
+                    onClick={(e) => handleCopyTier(e, tier)}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded font-medium text-sm transition-colors flex items-center justify-center gap-1"
+                    title="Copy tier details"
+                  >
+                    <span>📋</span> Copy
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteTier(e, tier.id)}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-medium text-sm transition-colors flex items-center justify-center gap-1"
+                    title="Delete this tier"
+                  >
+                    <span>🗑️</span> Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
