@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { BuilderCanvas } from "@/components/builder/Canvas";
 import { Button } from "@/components/ui/button";
-import { Plus, Layout, Search, Zap, Sparkles, Calendar, Trash2 } from "lucide-react";
+import { Plus, Layout, Search, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DndProvider } from "react-dnd";
@@ -54,10 +54,6 @@ export default function LandingPages() {
     setView("editor");
   };
 
-  const handleViewTemplates = () => {
-    console.log("View templates clicked");
-  };
-
   const handleAIBuilder = () => {
     navigate("/ai-builder");
   };
@@ -95,10 +91,6 @@ export default function LandingPages() {
                 <Button onClick={handleAIBuilder} className="px-6 py-6 rounded-2xl shadow-md hover:shadow-lg transition-all font-bold text-base group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
                   <Sparkles className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                   AI Builder
-                </Button>
-                <Button onClick={handleViewTemplates} variant="outline" className="px-6 py-6 rounded-2xl shadow-md hover:shadow-lg transition-all font-bold text-base group border-2 border-valasys-orange text-valasys-orange hover:bg-valasys-orange/5">
-                  <Zap className="w-5 h-5 mr-2" />
-                  View Templates
                 </Button>
                 <Button onClick={handleCreateNew} className="bg-valasys-orange hover:bg-valasys-orange/90 text-white px-6 py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all font-bold text-base group">
                   <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
