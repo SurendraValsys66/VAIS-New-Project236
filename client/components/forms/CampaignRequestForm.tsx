@@ -635,6 +635,17 @@ function DeliverablesDialog({
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                  onClick={() => {
+                    // Send mail functionality placeholder
+                    console.log("Send mail triggered");
+                  }}
+                >
+                  <Mail className="w-4 h-4" />
+                  Send Mail
+                </Button>
+                <Button
+                  size="sm"
                   className="bg-orange-600 hover:bg-orange-700 text-white flex items-center gap-2"
                   onClick={() => {
                     // Export functionality placeholder
